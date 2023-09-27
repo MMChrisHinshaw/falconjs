@@ -1,6 +1,6 @@
 import { Configuration, FetchAPI } from "./runtime";
 import { EventStream } from "./event_stream";
-import { FalconCloud } from "./FalconCloud";
+import { FalconCloud, CloudBasePath } from "./FalconCloud";
 import { OAuth2, UserAgent } from "./middleware";
 import {
     AlertsApi,
@@ -64,6 +64,9 @@ export interface FalconClientOptions {
 
     /** Select Falcon Cloud for connection */
     cloud: FalconCloud;
+
+    /** Select Falcon basePath for connection */
+    basePath: string;
 
     /** Client API credentials: ClientID */
     clientId: string;
@@ -141,6 +144,7 @@ export class FalconClient {
             memberCid: options.memberCid,
         });
         this.config = new Configuration({
+            basePath: options.basePath || CloudBasePath(options.cloud),
             fetchApi: options.fetchApi,
             accessToken: oauth2.accessToken.bind(oauth2),
             middleware: [new UserAgent()],
