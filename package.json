@@ -37,7 +37,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/MMChrisHinshaw/falconjs.git"
+        "url": "git+https://github.com/crowdstrike/falconjs.git"
     },
     "keywords": [
         "CrowdStrike",
@@ -47,7 +47,7 @@
     "author": "Simon Lukasik",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/MMChrisHinshaw/falconjs/issues"
+        "url": "https://github.com/crowdstrike/falconjs/issues"
     },
-    "homepage": "https://github.com/MMChrisHinshaw/falconjs#readme"
+    "homepage": "https://github.com/crowdstrike/falconjs#readme"
 }
