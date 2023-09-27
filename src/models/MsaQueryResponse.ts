@@ -78,6 +78,9 @@ export function MsaQueryResponseToJSON(value?: MsaQueryResponse | null): any {
     if (value === null) {
         return null;
     }
+    if (value.errors === undefined) {
+        value.errors = [];
+    }
     return {
         errors: (value.errors as Array<any>).map(MsaAPIErrorToJSON),
         meta: MsaMetaInfoToJSON(value.meta),
