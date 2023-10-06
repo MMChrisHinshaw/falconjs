@@ -1,17 +1,24 @@
 import { MainAvailableStreamV2 } from "./models";
 import * as runtime from "./runtime";
 
-type EventStreamCallback = (a: object) => void;
+type EventStreamCallback = (a: object, b?: boolean) => void;
 
 export class EventStream {
     constructor(private configuration: runtime.Configuration, private appName: string, private resource: MainAvailableStreamV2) {}
 
-    async process(callback: EventStreamCallback, offset?: number) {
+    async process(callback: EventStreamCallback, offset?: number, timeout_ms?: number) {
         let url = this.resource.dataFeedURL;
         if (offset && offset != 0) {
             url += "&offset=" + offset;
         }
 
+        const controller = new AbortController();
+        let allow_happy_callback = true;
+        setTimeout(() => {
+            allow_happy_callback = false;
+            controller.abort();
+            callback({}, true);
+        }, timeout_ms);
         const headerParameters: runtime.HTTPHeaders = {
             Accept: "application/json",
             Connection: "Keep-Alive",
@@ -19,7 +26,11 @@ export class EventStream {
             Authorization: "Token " + this.resource.sessionToken.token,
         };
 
-        (this.configuration.fetchApi || fetch)(url, { headers: headerParameters })
+        let buffer = "";
+        (this.configuration.fetchApi || fetch)(url, {
+            headers: headerParameters,
+            signal: controller.signal
+            })
             .then((response) => {
                 if (response.status < 200 || response.status >= 300) {
                     throw new runtime.ResponseError(response, "Response returned an error code");
@@ -49,7 +60,6 @@ export class EventStream {
                     //}
                 } else if (res.on) {
                     // We run under a node
-                    let buffer = "";
                     res.on("readable", () => {
                         let chunk;
                         while (null !== (chunk = res.read())) {
@@ -59,7 +69,9 @@ export class EventStream {
                                 const objectString = buffer.substring(0, delimiter);
                                 buffer = buffer.substring(delimiter + 1);
                                 if (objectString.trim() == "") continue;
-                                callback(JSON.parse(objectString));
+                                if(allow_happy_callback) {
+                                    callback(JSON.parse(objectString));
+                                }
                             }
                         }
                     });
